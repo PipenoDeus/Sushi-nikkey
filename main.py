@@ -107,20 +107,41 @@ root = tk.Tk()
 root.title("Sushi-Nikkey App")
 clientes = {}
 root.geometry("600x500")
-label = tk.Label(root, text="¡Bienvenido a sushi nikkey!", font=("Arial", 14))
-label.pack(pady=20)
+label = tk.Label(root, text="¡Bienvenido a Sushi Nikkey!", font=("Arial", 14), bg="black", fg="white")
+label.place(x=250, y=20)
+labelmenu = tk.Label(root, text="Menu actual", font=("Arial", 14), bg="black", fg="white")
+labelmenu.place(x=310, y=100)
+labelproductos = tk.Label(root, text="California: $5.100 \n Crab Ahumado: $6.100 \n Tempura: $5.800", font=("Arial", 14), bg="black", fg="white")
+labelproductos.place(x=255, y=180)
+root.configure(bg="black")
+root.minsize(600, 500)
+root.maxsize(600, 500)
+
 
 ##logo
-image = Image.open("logo.png")
+image = Image.open("logo.png").convert("RGBA") 
 image = image.resize((100, 100))
 photo = ImageTk.PhotoImage(image)
 logo_label = tk.Label(root, image=photo)
 logo_label.pack(pady=10)
+logo_label.place(x=40, y=25)
+logo_label.lift()
 
 
-tk.Button(root, text="Registrar Cliente", command=registrar_cliente).pack()
-tk.Button(root, text="Consultar Cliente", command=consultar_cliente).pack()
-tk.Button(root, text="Registrar Pedido", command=registrar_pedido).pack()
-tk.Button(root, text="Salir", command=root.quit).pack()
+
+#botones
+btn_registrar_cliente = tk.Button(root, text="Registrar Cliente", command=registrar_cliente, bg="lightblue")
+btn_registrar_cliente.place(relx=0.15, rely=0.35, anchor="center", width=150, height=35)
+
+btn_consultar_cliente = tk.Button(root, text="Consultar Cliente", command=consultar_cliente, bg="lightgreen")
+btn_consultar_cliente.place(relx=0.15, rely=0.42, anchor="center", width=150, height=35)
+
+btn_registrar_pedido = tk.Button(root, text="Registrar Pedido", command=registrar_pedido, bg="orange")
+btn_registrar_pedido.place(relx=0.15, rely=0.49, anchor="center", width=150, height=35)
+
+btn_salir = tk.Button(root, text="Salir", command=root.quit, bg="red", fg="white")
+btn_salir.place(relx=0.15, rely=0.56, anchor="center", width=150, height=35)
+
+
 
 root.mainloop()
