@@ -5,20 +5,19 @@ def conectar():
     return sqlite3.connect("sushi_nikkey.db")
 
 
-def crear_tablas():
-    conn = conectar()
+def crear_tabla():
+    conn = sqlite3.connect("clientes.db")
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS clientes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            rut TEXT UNIQUE NOT NULL,
+            rut TEXT PRIMARY KEY,
             nombre TEXT NOT NULL,
-            direccion TEXT NOT NULL,
-            comuna TEXT NOT NULL,
-            correo TEXT NOT NULL,
-            edad INTEGER NOT NULL,
-            celular TEXT NOT NULL,
-            tipo TEXT NOT NULL
+            direccion TEXT,
+            comuna TEXT,
+            correo TEXT UNIQUE,
+            edad INTEGER,
+            celular TEXT,
+            tipo TEXT
         )
     """)
     conn.commit()
