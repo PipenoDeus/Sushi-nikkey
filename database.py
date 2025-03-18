@@ -45,6 +45,3 @@ def obtener_clientes():
     clientes = cursor.fetchall()
     conn.close()
     return clientes
-
-
-crear_tablas()
