@@ -627,16 +627,16 @@ btn_salir = tk.Button(root, text="Salir", command=root.quit, bg="red")
 btn_salir.place(relx=0.15, rely=0.75, anchor="center", width=150, height=35)
 
 #botones productos
-btn_registrar_producto = tk.Button(root, text="Registrar producto", command=agregar_producto, bg="Purple")
+btn_registrar_producto = tk.Button(root, text="Registrar producto", command=agregar_producto, bg="Purple", state="disabled")
 btn_registrar_producto.place(relx=0.85, rely=0.40, anchor="center", width=150, height=35)
 
-btn_consultar_producto = tk.Button(root, text="consultar producto", command=consultar_producto, bg="Blue")
+btn_consultar_producto = tk.Button(root, text="consultar producto", command=consultar_producto, bg="Blue", state="disabled")
 btn_consultar_producto.place(relx=0.85, rely=0.47, anchor="center", width=150, height=35)
 
-btn_modificar_producto = tk.Button(root, text="modificar producto", command=modificar_producto, bg="lightgreen")
+btn_modificar_producto = tk.Button(root, text="modificar producto", command=modificar_producto, bg="lightgreen", state="disabled")
 btn_modificar_producto.place(relx=0.85, rely=0.54, anchor="center", width=150, height=35)
 
-btn_eliminar_producto = tk.Button(root, text="eliminar producto", command=eliminar_producto, bg="Yellow")
+btn_eliminar_producto = tk.Button(root, text="eliminar producto", command=eliminar_producto, bg="Yellow", state="disabled")
 btn_eliminar_producto.place(relx=0.85, rely=0.61, anchor="center", width=150, height=35)
 
 def habilitar_botones():
@@ -644,6 +644,11 @@ def habilitar_botones():
     btn_consultar_cliente.config(state="normal")
     btn_modificar_cliente.config(state="normal")
     btn_eliminar_cliente.config(state="normal")
+
+    btn_registrar_producto.config(state="normal")
+    btn_consultar_producto.config(state="normal")
+    btn_modificar_producto.config(state="normal")
+    btn_eliminar_producto.config(state="normal")
 
 
 root.mainloop()
