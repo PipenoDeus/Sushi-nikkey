@@ -4,7 +4,7 @@ from tkinter import messagebox
 from tkinter import simpledialog
 from PIL import Image, ImageTk
 
-
+## Funciones login ##
 def registrar_admin(usuario, contrasena):
     conn = sqlite3.connect("clientes.db")
     cursor = conn.cursor()
@@ -20,15 +20,17 @@ def registrar_admin(usuario, contrasena):
 
 def login_admin():
     login_window = tk.Toplevel(root)  # Crear ventana de login
-    login_window.title("Login Administrador")
+    login_window.title("Login Admin")
+    login_window.geometry("250x70")
+    login_window.resizable(False, False)
 
     # Campos de usuario y contraseña
-    tk.Label(login_window, text="Usuario:").grid(row=0, column=0)
-    entry_usuario = tk.Entry(login_window)
+    tk.Label(login_window, text="Usuario:", width=10).grid(row=0, column=0)
+    entry_usuario = tk.Entry(login_window, width=30)
     entry_usuario.grid(row=0, column=1)
 
     tk.Label(login_window, text="Contraseña:").grid(row=1, column=0)
-    entry_contrasena = tk.Entry(login_window, show="*")  # Ocultar contraseña
+    entry_contrasena = tk.Entry(login_window, show="*",width=30 )  # Ocultar contraseña
     entry_contrasena.grid(row=1, column=1)
 
     def verificar_login():
@@ -52,6 +54,8 @@ def login_admin():
 
     # Botón para iniciar sesión
     tk.Button(login_window, text="Iniciar Sesión", command=verificar_login).grid(row=2, columnspan=2)
+
+##funciones cliente##
 
 def registrar_cliente():
     def guardar_cliente():
@@ -136,14 +140,6 @@ def registrar_cliente():
     tk.Button(cliente_window, text="Registrar", command=guardar_cliente).grid(row=8, columnspan=2)
 
 
-
-def habilitar_botones():
-    btn_registrar_cliente.config(state="normal")
-    btn_consultar_cliente.config(state="normal")
-    btn_modificar_cliente.config(state="normal")
-    btn_eliminar_cliente.config(state="normal")
-
-
 def consultar_cliente():
     rut = simpledialog.askstring("Consultar Cliente", "Ingrese el RUT del cliente:")
     
@@ -166,7 +162,6 @@ def consultar_cliente():
         messagebox.showerror("Error", "Cliente no encontrado")
 
 
-# ✏ MODIFICAR CLIENTE
 def modificar_cliente():
     rut = simpledialog.askstring("Modificar Cliente", "Ingrese el RUT del cliente:")
     
@@ -230,7 +225,7 @@ def modificar_cliente():
 
     tk.Button(cliente_window, text="Guardar Cambios", command=guardar_modificacion).grid(row=len(campos), columnspan=2)
 
-# ❌ ELIMINAR CLIENTE
+
 def eliminar_cliente():
     rut = simpledialog.askstring("Eliminar Cliente", "Ingrese el RUT del cliente:")
 
@@ -271,7 +266,7 @@ def obtener_nombre_cliente(rut):
     # Si no se encuentra el cliente, devuelve None
     return resultado[0] if resultado else None
 
-
+## funciones pedido ## 
 def registrar_pedido():
     # Pedir RUT del cliente antes de abrir la ventana de pedido
     rut = simpledialog.askstring("Registrar Pedido", "Ingrese el RUT del cliente:")
@@ -327,6 +322,263 @@ def registrar_pedido():
 
     tk.Button(pedido_window, text="Cerrar", command=pedido_window.destroy).grid(row=row+1, columnspan=2, pady=5)
 
+def agregar_producto():
+    # Crear ventana para ingresar producto
+    def guardar_producto():
+        nombre = entry_nombre.get()
+        precio = entry_precio.get()
+        descripcion = entry_descripcion.get()
+
+        if nombre and precio:
+            # Guardar el producto en la base de datos
+            insertar_producto(nombre, precio,descripcion)
+            messagebox.showinfo("Éxito", "Producto agregado correctamente")
+            producto_window.destroy()
+        else:
+            messagebox.showerror("Error", "Por favor complete todos los campos")
+
+    producto_window = tk.Toplevel(root)
+    producto_window.title("Agregar Producto")
+    producto_window.geometry("350x100")
+
+    tk.Label(producto_window, text="Nombre del Producto:").grid(row=0, column=0)
+    entry_nombre = tk.Entry(producto_window, width=30)
+    entry_nombre.grid(row=0, column=1,)
+
+    tk.Label(producto_window, text="Precio:").grid(row=1, column=0)
+    entry_precio = tk.Entry(producto_window, width=30)
+    entry_precio.grid(row=1, column=1)
+
+    tk.Label(producto_window, text="Descripcion:").grid(row=2, column=0)
+    entry_descripcion = tk.Entry(producto_window, width=30)  # Crear el Entry para la descripción
+    entry_descripcion.grid(row=2, column=1)  # Ubicar el Entry en la fila 2 y columna 1
+
+    tk.Button(producto_window, text="Guardar Producto", command=guardar_producto).grid(row=3, column=1, pady=5)
+
+def insertar_producto(nombre,precio,descripcion):
+    conn = sqlite3.connect('productos_tienda.db')
+    cursor = conn.cursor()
+
+    # Insertar un nuevo producto
+    cursor.execute('''
+    INSERT INTO productos (nombre, precio, descripcion)
+    VALUES (?, ?, ?)
+    ''', (nombre, precio, descripcion))
+
+    # Confirmar los cambios y cerrar la conexión
+    conn.commit()
+    conn.close()
+
+def consultar_producto():
+    # Crear una nueva ventana para mostrar la información del producto
+    consulta_window = tk.Toplevel(root)
+    consulta_window.title("Consultar Producto")
+    consulta_window.geometry("350x200")  # Establecer dimensiones de la ventana
+
+    # Etiqueta para pedir el nombre del producto
+    tk.Label(consulta_window, text="Ingrese el nombre del producto:").grid(row=0, column=0, padx=5, pady=5)
+    
+    # Campo de entrada para el nombre del producto
+    entry_nombre_producto = tk.Entry(consulta_window)
+    entry_nombre_producto.grid(row=0, column=1, padx=5, pady=5)
+    
+    # Etiquetas para mostrar la información del producto
+    label_id = tk.Label(consulta_window, text="ID:")  # Mostrar el ID del producto
+    label_nombre = tk.Label(consulta_window, text="Nombre:")  # Mostrar el nombre del producto
+    label_descripcion = tk.Label(consulta_window, text="Descripción:")  # Mostrar la descripción
+    label_precio = tk.Label(consulta_window, text="Precio:")  # Mostrar el precio
+    
+    label_id.grid(row=1, column=0, padx=5, pady=5)
+    label_nombre.grid(row=2, column=0, padx=5, pady=5)
+    label_descripcion.grid(row=3, column=0, padx=5, pady=5)
+    label_precio.grid(row=4, column=0, padx=5, pady=5)
+
+    # Función que se ejecuta al presionar el botón de consulta
+    def buscar_producto():
+        nombre_producto = entry_nombre_producto.get().strip()  # Obtener el nombre del producto y quitar espacios extra
+        
+        if not nombre_producto:
+            messagebox.showerror("Error", "Debe ingresar un nombre de producto.")
+            return
+        
+        # Conectar a la base de datos
+        conn = sqlite3.connect("productos_tienda.db")
+        cursor = conn.cursor()
+        
+        # Consultar producto por nombre
+        cursor.execute("SELECT id, descripcion, precio FROM productos WHERE nombre = ?", (nombre_producto,))
+        resultado = cursor.fetchone()
+        
+        conn.close()
+        
+        if resultado:
+            # Mostrar los datos del producto en las etiquetas
+            label_id.config(text=f"ID: {resultado[0]}")
+            label_nombre.config(text=f"Nombre: {nombre_producto}")  # El nombre se obtiene directamente
+            label_descripcion.config(text=f"Descripción: {resultado[1]}")
+            label_precio.config(text=f"Precio: ${resultado[2]}")
+        else:
+            messagebox.showerror("Error", "Producto no encontrado.")
+
+    # Botón para realizar la consulta
+    tk.Button(consulta_window, text="Consultar", command=buscar_producto).grid(row=5, columnspan=2, pady=10)
+
+
+
+def modificar_producto():
+    # Crear una nueva ventana para ingresar el nombre del producto
+    id_window = tk.Toplevel(root)
+    id_window.title("Buscar Producto")
+    id_window.geometry("370x90")  # Establecer dimensiones de la ventana
+
+    # Etiqueta para pedir el nombre del producto
+    tk.Label(id_window, text="Ingrese el nombre del producto a modificar:").grid(row=0, column=0, padx=10, pady=10)
+    
+    # Campo de entrada para el nombre del producto
+    entry_nombre_producto = tk.Entry(id_window)
+    entry_nombre_producto.grid(row=0, column=1, padx=10, pady=10)
+
+    # Función para buscar el producto por nombre
+    def buscar_producto():
+        nombre_producto = entry_nombre_producto.get().strip()  # Obtener el nombre del producto
+        
+        if not nombre_producto:
+            messagebox.showerror("Error", "Debe ingresar un nombre de producto.")
+            return
+        
+        # Conectar a la base de datos
+        conn = sqlite3.connect("productos_tienda.db")
+        cursor = conn.cursor()
+        
+        # Consultar producto por nombre
+        cursor.execute("SELECT id, descripcion, precio FROM productos WHERE nombre = ?", (nombre_producto,))
+        resultado = cursor.fetchone()
+        
+        if resultado:
+            # Si el producto existe, abrir la ventana para modificar
+            id_window.destroy()  # Cerrar la ventana de nombre
+            
+            # Nueva ventana para modificar los datos del producto
+            modificar_window = tk.Toplevel(root)
+            modificar_window.title("Modificar Producto")
+            modificar_window.geometry("370x200")  # Establecer dimensiones de la ventana
+
+            # Etiquetas para mostrar y modificar la información del producto
+            label_id = tk.Label(modificar_window, text="ID:")  # Mostrar el ID del producto
+            label_nombre = tk.Label(modificar_window, text="Nombre:")
+            label_descripcion = tk.Label(modificar_window, text="Descripción:")
+            label_precio = tk.Label(modificar_window, text="Precio:")
+            
+            label_id.grid(row=1, column=0, padx=10, pady=10)
+            label_nombre.grid(row=2, column=0, padx=10, pady=10)
+            label_descripcion.grid(row=3, column=0, padx=10, pady=10)
+            label_precio.grid(row=4, column=0, padx=10, pady=10)
+
+            # Campos de entrada para modificar los datos del producto
+            entry_id = tk.Entry(modificar_window, state="readonly")  # El ID no es modificable
+            entry_nombre = tk.Entry(modificar_window)
+            entry_descripcion = tk.Entry(modificar_window)
+            entry_precio = tk.Entry(modificar_window)
+
+            entry_id.grid(row=1, column=1, padx=10, pady=10)
+            entry_nombre.grid(row=2, column=1, padx=10, pady=10)
+            entry_descripcion.grid(row=3, column=1, padx=10, pady=10)
+            entry_precio.grid(row=4, column=1, padx=10, pady=10)
+
+            # Precargar los datos del producto en los campos de entrada
+            entry_id.insert(0, resultado[0])  # Mostrar el ID
+            entry_nombre.insert(0, nombre_producto)  # Mostrar el nombre que fue buscado
+            entry_descripcion.insert(0, resultado[1])  # Mostrar la descripción
+            entry_precio.insert(0, resultado[2])  # Mostrar el precio
+
+            # Función para guardar los cambios
+            def guardar_producto_modificado():
+                try:
+                    nombre = entry_nombre.get()
+                    descripcion = entry_descripcion.get()
+                    precio = float(entry_precio.get())
+                except ValueError:
+                    messagebox.showerror("Error", "Por favor ingrese datos válidos.")
+                    return
+                
+                if not nombre or not descripcion or not precio:
+                    messagebox.showerror("Error", "Debe completar todos los campos.")
+                    return
+                
+                # Conectar a la base de datos
+                conn = sqlite3.connect("productos_tienda.db")
+                cursor = conn.cursor()
+                
+                # Actualizar los detalles del producto en la base de datos
+                cursor.execute(""" 
+                    UPDATE productos 
+                    SET nombre = ?, descripcion = ?, precio = ? 
+                    WHERE id = ? 
+                """, (nombre, descripcion, precio, resultado[0]))  # Usamos el ID del producto encontrado
+                conn.commit()
+                conn.close()
+                
+                messagebox.showinfo("Éxito", "Producto modificado exitosamente.")
+                modificar_window.destroy()  # Cerrar la ventana de modificación
+
+            # Botón para guardar los cambios
+            tk.Button(modificar_window, text="Guardar Cambios", command=guardar_producto_modificado).grid(row=5, columnspan=2, pady=10)
+        
+        else:
+            messagebox.showerror("Error", "Producto no encontrado.")
+        
+        conn.close()
+
+    # Botón para buscar el producto por nombre
+    tk.Button(id_window, text="Buscar Producto", command=buscar_producto).grid(row=1, columnspan=2, pady=10)
+
+def eliminar_producto():
+    # Crear una nueva ventana para ingresar el nombre del producto a eliminar
+    nombre_window = tk.Toplevel(root)
+    nombre_window.title("Eliminar Producto")
+    nombre_window.geometry("370x90")  # Establecer dimensiones de la ventana
+
+    # Etiqueta para pedir el nombre del producto
+    tk.Label(nombre_window, text="Ingrese el nombre del producto a eliminar:").grid(row=0, column=0, padx=10, pady=10)
+    
+    # Campo de entrada para el nombre del producto
+    entry_nombre_producto = tk.Entry(nombre_window)
+    entry_nombre_producto.grid(row=0, column=1, padx=10, pady=10)
+
+    # Función para buscar el producto por nombre y eliminarlo
+    def buscar_y_eliminar_producto():
+        nombre_producto = entry_nombre_producto.get().strip()  # Obtener el nombre del producto
+        
+        if not nombre_producto:
+            messagebox.showerror("Error", "Debe ingresar un nombre de producto.")
+            return
+        
+        # Conectar a la base de datos
+        conn = sqlite3.connect("productos_tienda.db")
+        cursor = conn.cursor()
+        
+        # Consultar producto por nombre
+        cursor.execute("SELECT id, nombre FROM productos WHERE nombre = ?", (nombre_producto,))
+        resultado = cursor.fetchone()
+        
+        if resultado:
+            # Si el producto existe, pedir confirmación para eliminar
+            confirmacion = messagebox.askyesno("Confirmación", f"¿Está seguro que desea eliminar el producto '{resultado[1]}'?")
+            if confirmacion:
+                # Eliminar el producto de la base de datos usando su ID
+                cursor.execute("DELETE FROM productos WHERE id = ?", (resultado[0],))
+                conn.commit()
+                messagebox.showinfo("Éxito", "Producto eliminado exitosamente.")
+            else:
+                messagebox.showinfo("Cancelado", "Eliminación de producto cancelada.")
+        else:
+            messagebox.showerror("Error", "Producto no encontrado.")
+        
+        conn.close()
+
+    # Botón para buscar y eliminar el producto por nombre
+    tk.Button(nombre_window, text="Eliminar Producto", command=buscar_y_eliminar_producto).grid(row=1, columnspan=2, pady=10)
+
 
 root = tk.Tk()
 root.title("Sushi-Nikkey App")
@@ -334,13 +586,10 @@ clientes = {}
 root.geometry("600x500")
 label = tk.Label(root, text="¡Bienvenido a Sushi Nikkey!", font=("Arial", 14), bg="black", fg="white")
 label.place(x=250, y=20)
-labelmenu = tk.Label(root, text="Menu actual", font=("Arial", 14), bg="black", fg="white")
-labelmenu.place(x=310, y=100)
-labelproductos = tk.Label(root, text="California: $5.100 \n Crab Ahumado: $6.100 \n Tempura: $5.800", font=("Arial", 14), bg="black", fg="white")
-labelproductos.place(x=255, y=180)
 root.configure(bg="black")
 root.minsize(600, 500)
 root.maxsize(600, 500)
+
 
 
 ##logo
@@ -353,27 +602,48 @@ logo_label.place(x=40, y=70)
 logo_label.lift()
 
 
-#botones
-btn_registrar_cliente = tk.Button(root, text="Registrar Cliente", command=registrar_cliente, bg="blue", state="disabled")
+
+#botones login
+btn_login = tk.Button(root, text="Login Admin", command=login_admin, bg="white")
+btn_login.place(relx=0.15, rely=0.08, anchor="center", width=150, height=35)
+
+#botones Clientes
+btn_registrar_cliente = tk.Button(root, text="Registrar Cliente", command=registrar_cliente, bg="Purple", state="disabled")
 btn_registrar_cliente.place(relx=0.15, rely=0.40, anchor="center", width=150, height=35)
 
-btn_consultar_cliente = tk.Button(root, text="Consultar Cliente", command=consultar_cliente, bg="lightgreen", state="disabled")
+btn_consultar_cliente = tk.Button(root, text="Consultar Cliente", command=consultar_cliente, bg="blue", state="disabled")
 btn_consultar_cliente.place(relx=0.15, rely=0.47, anchor="center", width=150, height=35)
 
-btn_modificar_cliente = tk.Button(root, text="Modificar Cliente", command=modificar_cliente, bg="yellow", state="disabled")
+btn_modificar_cliente = tk.Button(root, text="Modificar Cliente", command=modificar_cliente, bg="lightgreen", state="disabled")
 btn_modificar_cliente.place(relx=0.15, rely=0.54, anchor="center", width=150, height=35)
 
-btn_eliminar_cliente = tk.Button(root, text="Eliminar Cliente", command=eliminar_cliente, bg="red", fg="white", state="disabled")
+btn_eliminar_cliente = tk.Button(root, text="Eliminar Cliente", command=eliminar_cliente, bg="yellow", state="disabled")
 btn_eliminar_cliente.place(relx=0.15, rely=0.61, anchor="center", width=150, height=35)
 
 btn_registrar_pedido = tk.Button(root, text="Registrar Pedido", command=registrar_pedido, bg="orange")
 btn_registrar_pedido.place(relx=0.15, rely=0.68, anchor="center", width=150, height=35)
 
-btn_salir = tk.Button(root, text="Salir", command=root.quit, bg="red", fg="white")
+btn_salir = tk.Button(root, text="Salir", command=root.quit, bg="red")
 btn_salir.place(relx=0.15, rely=0.75, anchor="center", width=150, height=35)
 
-btn_login = tk.Button(root, text="Login Admin", command=login_admin, bg="white")
-btn_login.place(relx=0.15, rely=0.08, anchor="center", width=150, height=35)
+#botones productos
+btn_registrar_producto = tk.Button(root, text="Registrar producto", command=agregar_producto, bg="Purple")
+btn_registrar_producto.place(relx=0.85, rely=0.40, anchor="center", width=150, height=35)
+
+btn_consultar_producto = tk.Button(root, text="consultar producto", command=consultar_producto, bg="Blue")
+btn_consultar_producto.place(relx=0.85, rely=0.47, anchor="center", width=150, height=35)
+
+btn_modificar_producto = tk.Button(root, text="modificar producto", command=modificar_producto, bg="lightgreen")
+btn_modificar_producto.place(relx=0.85, rely=0.54, anchor="center", width=150, height=35)
+
+btn_eliminar_producto = tk.Button(root, text="eliminar producto", command=eliminar_producto, bg="Yellow")
+btn_eliminar_producto.place(relx=0.85, rely=0.61, anchor="center", width=150, height=35)
+
+def habilitar_botones():
+    btn_registrar_cliente.config(state="normal")
+    btn_consultar_cliente.config(state="normal")
+    btn_modificar_cliente.config(state="normal")
+    btn_eliminar_cliente.config(state="normal")
 
 
 root.mainloop()
