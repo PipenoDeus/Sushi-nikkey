@@ -185,16 +185,16 @@ def modificar_cliente():
     cliente_window = tk.Toplevel()
     cliente_window.title("Modificar Cliente")
 
-    # Crear etiquetas y campos de entrada con los datos actuales del cliente
+    
     campos = ["Nombre", "Dirección", "Comuna", "Correo", "Edad", "Celular"]
     entradas = {}
 
-    for i, (campo, valor) in enumerate(zip(campos, cliente[1:])):  # Saltamos el RUT (cliente[0])
+    for i, (campo, valor) in enumerate(zip(campos, cliente[1:])):  
         tk.Label(cliente_window, text=f"{campo}:").grid(row=i, column=0)
         entrada = tk.Entry(cliente_window)
-        entrada.insert(0, valor)  # Rellenar con el valor actual
+        entrada.insert(0, valor) 
         entrada.grid(row=i, column=1)
-        entradas[campo] = entrada  # Guardar la referencia del campo
+        entradas[campo] = entrada 
 
     def guardar_modificacion():
         nuevos_datos = {campo: entrada.get() for campo, entrada in entradas.items()}
@@ -268,30 +268,34 @@ def obtener_nombre_cliente(rut):
 
 ## funciones pedido ## 
 def registrar_pedido():
-    # Pedir RUT del cliente antes de abrir la ventana de pedido
     rut = simpledialog.askstring("Registrar Pedido", "Ingrese el RUT del cliente:")
-    
-    # Si el usuario no ingresa nada o cancela, no abrir la ventana
     if not rut:
         messagebox.showerror("Error", "Debe ingresar un RUT válido")
         return
 
-    # Obtener el nombre del cliente usando la función que creaste
     nombre_cliente = obtener_nombre_cliente(rut)
-    
-    # Imprimir el valor de nombre_cliente para depuración
     print(f"Nombre del cliente: '{nombre_cliente}'")
 
-    # Verificar si el nombre del cliente es None o vacío (significa que no se encontró el cliente)
     if not nombre_cliente:
         messagebox.showerror("Error", "No se encuentra un cliente con ese RUT")
         return
 
-    # Abrir la ventana de registro de pedido si el cliente existe
+    # Crear ventana de pedido
     pedido_window = tk.Toplevel(root)
-    pedido_window.title(f"Registro de Pedido - {nombre_cliente}")  # Mostrar el nombre en el título
+    pedido_window.title(f"Registro de Pedido - {nombre_cliente}")
 
-    productos = {"California": 5100, "Crab Ahumado": 6100, "Tempura": 5800}
+    tk.Label(pedido_window, text=f"Cliente: {nombre_cliente}", font=("Arial", 12, "bold")).grid(row=0, columnspan=2, pady=5)
+
+    tk.Label(pedido_window, text="Cantidad:").grid(row=1, column=0)
+    entry_cantidad = tk.Entry(pedido_window)
+    entry_cantidad.grid(row=1, column=1)
+
+    # Obtener productos desde la base de datos
+    conn = sqlite3.connect("productos_tienda.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT nombre, precio FROM productos")
+    productos = cursor.fetchall()  # Lista de tuplas [(nombre, precio), ...]
+
     total = tk.IntVar(value=0)
 
     def agregar_pedido(producto, precio):
@@ -299,28 +303,49 @@ def registrar_pedido():
             cantidad = int(entry_cantidad.get())
             if cantidad <= 0:
                 raise ValueError
-            total.set(total.get() + (cantidad * precio))
+            subtotal = cantidad * precio
+            total.set(total.get() + subtotal)
             label_total.config(text=f"Total: ${total.get()}")
         except ValueError:
             messagebox.showerror("Error", "Ingrese una cantidad válida")
 
-    # Mostrar nombre del cliente en la ventana
-    tk.Label(pedido_window, text=f"Cliente: {nombre_cliente}", font=("Arial", 12, "bold")).grid(row=0, columnspan=2, pady=5)
-
-    tk.Label(pedido_window, text="Cantidad:").grid(row=1, column=0)
-    entry_cantidad = tk.Entry(pedido_window)
-    entry_cantidad.grid(row=1, column=1)
-
     row = 2
-    for producto, precio in productos.items():
-        tk.Button(pedido_window, text=f"{producto} - ${precio}", 
+    for producto, precio in productos:
+        tk.Button(pedido_window, text=f"{producto} - ${precio}",
                   command=lambda p=producto, pr=precio: agregar_pedido(p, pr)).grid(row=row, columnspan=2, pady=2)
         row += 1
 
     label_total = tk.Label(pedido_window, text="Total: $0", font=("Arial", 10, "bold"))
     label_total.grid(row=row, columnspan=2, pady=5)
 
+    # Campo para ingresar pago del cliente
+    row += 1
+    tk.Label(pedido_window, text="Pago del Cliente:").grid(row=row, column=0)
+    entry_pago = tk.Entry(pedido_window)
+    entry_pago.grid(row=row, column=1)
+
+    # Mostrar cambio
+    row += 1
+    label_cambio = tk.Label(pedido_window, text="Cambio: $0", font=("Arial", 10, "bold"))
+    label_cambio.grid(row=row, columnspan=2, pady=5)
+
+    def calcular_cambio():
+        try:
+            pago = int(entry_pago.get())
+            if pago < total.get():
+                messagebox.showerror("Error", "El pago es menor al total")
+                return
+            cambio = pago - total.get()
+            label_cambio.config(text=f"Cambio: ${cambio}")
+        except ValueError:
+            messagebox.showerror("Error", "Ingrese un monto válido")
+
+    # Botón para calcular cambio
+    row += 1
+    tk.Button(pedido_window, text="Calcular Cambio", command=calcular_cambio).grid(row=row, columnspan=2, pady=5)
+
     tk.Button(pedido_window, text="Cerrar", command=pedido_window.destroy).grid(row=row+1, columnspan=2, pady=5)
+
 
 def agregar_producto():
     # Crear ventana para ingresar producto
